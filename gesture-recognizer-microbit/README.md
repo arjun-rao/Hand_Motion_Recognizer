@@ -1,4 +1,4 @@
-# Guesture-Recognizer
+# Gesture-Recognizer
 
 Author: Arjun Rao
 
@@ -11,7 +11,7 @@ yt clean
 yt build
 ```
 
-The HEX file for you micro:bit with then be generated and stored in build\bbc-microbit-classic-gcc\source\guesture-recognizer-combined.hex
+The HEX file for you micro:bit with then be generated and stored in build\bbc-microbit-classic-gcc\source\gesture-recognizer-combined.hex
 
 
 ## Links

@@ -1,5 +1,5 @@
 {
-  "name": "guesture-recognizer",
+  "name": "gesture-recognizer",
   "version": "2.1.1",
   "description": "The micro:bit runtime common abstraction with examples.",
   "license": "MIT",
