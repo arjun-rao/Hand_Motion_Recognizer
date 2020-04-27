@@ -97,6 +97,7 @@ public class AccelerometerActivity extends AppCompatActivity implements Connecti
             bluetooth_le_adapter = ((BleAdapterService.LocalBinder) service).getService();
             bluetooth_le_adapter.setActivityHandler(mMessageHandler);
             bluetooth_le_adapter.readCharacteristic(Utility.normaliseUUID(BleAdapterService.ACCELEROMETERSERVICE_SERVICE_UUID),Utility.normaliseUUID(BleAdapterService.ACCELEROMETERPERIOD_CHARACTERISTIC_UUID));
+            showMsg("Please wait... Receiving Data from MicroBit.");
         }
 
         @Override
@@ -120,6 +121,8 @@ public class AccelerometerActivity extends AppCompatActivity implements Connecti
         // connect to the Bluetooth smart service
         Intent gattServiceIntent = new Intent(this, BleAdapterService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        showMsg("Please wait... Receiving Data from MicroBit.");
+        toggleButtons(false);
     }
 
     @Override
@@ -203,21 +206,33 @@ public class AccelerometerActivity extends AppCompatActivity implements Connecti
     }
 
     public void onRecordClick(View v) {
-        ((Button) v).setEnabled(false);
-        next_rec_index = 0;
-        is_prediction = false;
-        recording = true;
+        if (notifications_on) {
+            ((Button) v).setEnabled(false);
+            next_rec_index = 0;
+            is_prediction = false;
+            recording = true;
+        } else {
+            showMsg("Still connecting to MicroBit...Please try again after MicroBit is Connected...");
+        }
     }
 
     public void onPredictClick(View v) {
-        ((Button) v).setEnabled(false);
-        next_rec_index = 0;
-        recording = true;
-        is_prediction = true;
+        if (notifications_on) {
+            ((Button) v).setEnabled(false);
+            next_rec_index = 0;
+            recording = true;
+            is_prediction = true;
+        } else {
+            showMsg("Still connecting to MicroBit...Please try again after MicroBit is Connected...");
+        }
     }
 
     public void onTrainClick(View v) {
-        this.sendTrainRequest();
+        if (notifications_on) {
+            this.sendTrainRequest();
+        } else {
+            showMsg("Still connecting to MicroBit...Please try again after MicroBit is Connected...");
+        }
     }
 
 
@@ -282,12 +297,14 @@ public class AccelerometerActivity extends AppCompatActivity implements Connecti
                     descriptor_uuid = bundle.getString(BleAdapterService.PARCEL_DESCRIPTOR_UUID);
                     Log.d(Constants.TAG, "descriptor " + descriptor_uuid + " of characteristic " + characteristic_uuid + " of service " + service_uuid + " written OK");
                     if (!exiting) {
-                        showMsg(Utility.htmlColorGreen("Accelerometer Data notifications ON"));
+                        showMsg(Utility.htmlColorGreen("MicroBit Ready"));
                         notifications_on=true;
                         start_time = System.currentTimeMillis();
+                        toggleButtons(true);
                     } else {
-                        showMsg(Utility.htmlColorGreen("Accelerometer Data notifications OFF"));
+                        showMsg(Utility.htmlColorGreen("MicroBit Disconnected"));
                         notifications_on=false;
+                        toggleButtons(false);
                         finish();
                     }
                     break;
@@ -388,6 +405,12 @@ public class AccelerometerActivity extends AppCompatActivity implements Connecti
                 ((TextView) AccelerometerActivity.this.findViewById(R.id.accel_period)).setText("Polling: "+Integer.toString(accelerometer_period)+"ms");
             }
         });
+    }
+
+    private void toggleButtons(boolean state) {
+        ((Button) AccelerometerActivity.this.findViewById(R.id.record_btn)).setEnabled(state);
+        ((Button) AccelerometerActivity.this.findViewById(R.id.train_btn)).setEnabled(state);
+        ((Button) AccelerometerActivity.this.findViewById(R.id.predict_btn)).setEnabled(state);
     }
 
     private void showAccelerometerData(final float [] accel_data, final double pitch, final double roll, final double force, final double flex) {
@@ -540,6 +563,7 @@ public class AccelerometerActivity extends AppCompatActivity implements Connecti
             showMsg(Utility.htmlColorGreen("Connected"));
         } else {
             showMsg(Utility.htmlColorRed("Disconnected"));
+            this.toggleButtons(false);
         }
     }
 
